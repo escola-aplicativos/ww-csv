@@ -1,0 +1,14 @@
+{
+    "name": "csv-import-ww",
+    "version": "1.0.0",
+    "scripts": {
+        "build": "weweb build",
+        "serve": "weweb serve"
+    },
+    "dependencies": {
+        "papaparse": "^5.4.1"
+    },
+    "devDependencies": {
+        "@weweb/cli": "^3.8.13"
+    }
+}
