@@ -1,75 +1,78 @@
 # CSV Importer - WeWeb Component
 
-Componente WeWeb para importação e mapeamento de arquivos CSV.
+Componente WeWeb para importação e mapeamento de arquivos CSV, com suporte a configuração dinâmica de colunas.
 
 ## 📋 Funcionalidades
 
-- ✅ Upload de arquivos CSV via drag & drop ou clique
-- ✅ Visualização e verificação dos dados importados
-- ✅ Mapeamento de colunas CSV para campos personalizados
-- ✅ Opção de ignorar cabeçalho
-- ✅ Exposição de dados mapeados como variável de componente
+- ✅ **Fluxo Guiado**: 3 passos claros (Upload, Verificação, Conclusão).
+- ✅ **Upload Flexível**: Suporta drag & drop ou clique para upload de arquivos CSV.
+- ✅ **Mapeamento Dinâmico**: Permite ao usuário definir quais colunas deseja extrair (ex: Nome, Email, WhatsApp, etc).
+- ✅ **Personalização**: Cor primária configurável para se adequar ao design do app.
+- ✅ **Exposição de Dados**: Disponibiliza os dados processados como variável bindable.
 
-## 🔧 Instalação
+## ⚙️ Propriedades (Configuração)
 
-```bash
-npm install
-npm run serve
-```
+O componente expõe as seguintes propriedades no painel do WeWeb:
+
+| Propriedade | Tipo | Descrição |
+|rag|rag|rag|
+| **Columns to map** | Array | Lista dos campos de destino para o mapeamento. Cada item possui `Label` (exibido na UI) e `Value` (chave no JSON final). Default: Nome, Email, Whatsapp. |
+| **Primary Color** | Color | Cor principal utilizada nos botões e indicadores de passo. |
 
 ## 📊 Variável Exposta
 
 ### `mappedData`
 
-Array de objetos com os dados do CSV mapeados de acordo com a configuração do usuário.
+Array de objetos contendo os dados do CSV processados e mapeados para as chaves definidas na propriedade `Columns`.
 
 **Tipo:** `Array<Object>`
 
 **Exemplo:**
 
-Se o CSV contém:
+Suponha que você configurou as colunas de destino como:
+- Label: "Nome Completo", Value: `nome`
+- Label: "E-mail", Value: `email`
+- Label: "Celular", Value: `wid`
+
+E importou um CSV:
 ```csv
-Nome,Email,Telefone
-João,joao@email.com,123456789
-Maria,maria@email.com,987654321
+Col A,Col B,Col C
+João Silva,joao@teste.com,(11) 99999-8888
 ```
 
-E o mapeamento é:
-- Coluna 0 → "name"
-- Coluna 1 → "email"
-- Coluna 2 → "phone"
-
-O `mappedData` será:
-```javascript
+O `mappedData` resultante será:
+```json
 [
-  { name: "João", email: "joao@email.com", phone: "123456789" },
-  { name: "Maria", email: "maria@email.com", phone: "987654321" }
+  {
+    "nome": "João Silva",
+    "email": "joao@teste.com",
+    "wid": "(11) 99999-8888"
+  }
 ]
 ```
 
-## 🎯 Como Usar no WeWeb
+## 📤 Eventos (Triggers)
 
-1. **Adicione o componente** à sua página
-2. **Configure um workflow** no evento "On Import"
-3. **Acesse a variável** `mappedData` através de:
-   - `[component_uid].mappedData` em bindings
-   - Variável de componente no painel de variáveis
+### `On Complete`
 
-## 📤 Eventos
-
-### `import`
-
-Disparado quando o usuário completa o processo de importação.
+Ocorre quando o usuário finaliza com sucesso o fluxo de importação. Possui acesso imediato aos dados mapeados.
 
 **Payload:**
 ```javascript
 {
-  data: Array,           // Dados brutos do CSV
-  mapping: Object,       // Mapeamento de colunas
-  ignoreHeader: Boolean, // Se o cabeçalho foi ignorado
-  mappedData: Array      // Dados mapeados (array de objetos)
+  mappedData: Array<Object> // Os mesmos dados disponíveis na variável
 }
 ```
+
+## 🎯 Como Usar
+
+1. **Arraste o componente** para sua página no editor WeWeb.
+2. **Configure as Colunas**: No painel de propriedades, defina quais campos você espera receber do CSV (ex: id, nome, status).
+3. **Configure o Workflow**:
+   - Selecione o componente.
+   - Vá na aba de Workflows.
+   - Adicione um trigger no evento **On Complete**.
+   - Use o valor do evento (`event.mappedData`) ou a variável do componente (`mappedData`) para salvar os dados no seu backend (Xano, Supabase, etc) ou iterar sobre eles.
 
 ## 🎨 Estrutura do Componente
 
@@ -77,20 +80,14 @@ Disparado quando o usuário completa o processo de importação.
 csv-import-ww/
 ├── src/
 │   ├── components/
-│   │   ├── ImporterStepper.vue       # Indicador de passos
-│   │   ├── ImporterStepUpload.vue    # Passo 1: Upload
-│   │   ├── ImporterStepVerification.vue # Passo 2: Verificação
-│   │   └── ImporterStepConclusion.vue   # Passo 3: Conclusão
-│   └── wwElement.vue                 # Componente principal
-├── ww-config.js                      # Configuração WeWeb
+│   │   ├── ImporterStepper.vue       # Navegação entre passos
+│   │   ├── ImporterStepUpload.vue    # Passo 1: Seleção de arquivo
+│   │   ├── ImporterStepVerification.vue # Passo 2: De/Para de colunas
+│   │   └── ImporterStepConclusion.vue   # Passo 3: Feedback final
+│   └── wwElement.vue                 # Lógica central e orquestração
+├── ww-config.js                      # Definição de propriedades e metadados WeWeb
 └── package.json
 ```
-
-## 🔄 Fluxo de Importação
-
-1. **Upload** - Usuário faz upload do arquivo CSV
-2. **Verificação** - Visualiza os dados e mapeia as colunas
-3. **Conclusão** - Confirma e os dados são expostos via `mappedData`
 
 ## 🛠️ Desenvolvimento
 
@@ -98,14 +95,6 @@ csv-import-ww/
 # Instalar dependências
 npm install
 
-# Servir em modo desenvolvimento
+# Servir em modo desenvolvimento (watch)
 npm run serve
-
-# Build para produção
-npm run build
 ```
-
-## 📦 Dependências
-
-- `papaparse` - Parser de CSV
-- `@weweb/cli` - CLI do WeWeb (dev)

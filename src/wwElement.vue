@@ -86,22 +86,7 @@ export default {
                     if (!isNaN(columnIndex) && row[columnIndex] !== undefined) {
                         let value = row[columnIndex];
                         
-                        // Special handling for Whatsapp (wid)
-                        if (fieldName === 'wid') {
-                            // 1. Remove all non-digit characters
-                            const cleaned = String(value).replace(/\D/g, '');
-                            
-                            // 2. Check for Brazilian pattern (10 or 11 digits: DDD + Number)
-                            // DDD (2) + Landline (8) = 10
-                            // DDD (2) + Mobile (9) = 11
-                            if (cleaned.length === 10 || cleaned.length === 11) {
-                                obj[fieldName] = '55' + cleaned;
-                            } else {
-                                obj[fieldName] = cleaned;
-                            }
-                        } else {
-                            obj[fieldName] = value;
-                        }
+                        obj[fieldName] = value;
                     }
                 });
                 return obj;
